@@ -1,0 +1,239 @@
+---
+title: "DAB501 Final Project"
+output:
+  html_document:
+    df_print: paged
+  html_notebook: default
+  pdf_document: default
+---
+
+## Packages and Data
+
+```{r}
+library(tidyverse)
+library(here)
+```
+
+```{r}
+# Assigning the data to a data frame
+df <- read.csv(here('data','Group10.csv'))
+```
+
+## MODELING: First pair of variables
+
+### Question 1: Identify the explanatory variable. 
+
+Temperature(temp): Temperature represents the average daily temperature in degrees Fahrenheit.
+
+### Question 2: Identify the response variable. 
+
+Count: Count represents the number of bikes rented on a particular day.
+
+### Question 3: Create a linear regression model and display the full output of the model.
+
+```{r}
+m1 <- lm(count ~ temp, data = df)
+summary(m1)
+```
+```{r}
+best_line <- function(slope, intercept, residuals = TRUE) {
+  data <- df %>% mutate(y_predicted = intercept + slope * temp,  
+                          square_residuals = (count - y_predicted)^2)
+
+  ssr <- data %>% summarize(ssr = round(sum(square_residuals), 0))
+  
+  if (residuals) {
+    p <- ggplot(data, aes(x = temp, y = count)) +
+          geom_point(shape = 21, fill = 'skyblue', size = 2) + 
+          geom_line(aes(x = temp, y = y_predicted), colour = 'blue') + 
+          geom_segment(aes(x = temp, y = count, 
+                           xend = temp, yend = y_predicted), linetype = 2) +
+          ggtitle(paste0("Sum of Squared Resdiduals: ", ssr[[1]]))
+  } else {    
+    p <- ggplot(data, aes(x = temp, y = count)) +
+          geom_point(shape = 21, fill = 'skyblue', size = 2) + 
+          geom_line(aes(x = temp, y = y_predicted), colour = 'blue')
+  }
+  p
+}
+best_line(slope = 73.019, intercept = 1031.443)
+```
+
+### Question 4: Using the variables noted in #1 and #2 above and the results of #3, write the equation for your model. 
+
+```{r}
+m2 <- lm(count ~ temp, data = df)
+summary(m2)
+```
+
+Slope: 73.019
+
+Intercept: 1031.443
+
+Formula: explanatory variable^ = Intercept + Slope*response variable
+
+Formula for Count : Count^ = 1031.443 + 73.019∗temp
+
+### Question 5: Explain what the intercept means in the context of the data. 
+
+The intercept is 1031.443. This means that when the temperature is 0 degrees Fahrenheit there will be on average of 1031.443 people using rented bikes on that particular date.
+
+### Question 6: Is the intercept a useful/meaningful value in the context of our data? If yes, explain. If not, explain what purpose it serves. 
+
+Though there are no data points where the temperature is 0 degrees Fahrenheit the intercept is still useful as the bulk of the data is close to the intercept. Thus, though the intercept is a predicted value it is still of interest.
+
+### Question 7: Explain what the slope means in the context of the data. 
+
+The slope is 73.019. This means that for every 1 degrees Fahrenheit that the temperature rises by there will be an expected(/predicted) increase of 73.019 people who will rent a bike on average.
+
+
+## MODELING: Second pair of variables
+
+### Question 1: Identify the explanatory variable.  
+
+precipitation: precipitation represents the amount of precipitation, measure in mm
+
+### Question 2: Identify the response variable.  
+
+Count: Count represents the number of bikes rented on a particular day.
+
+### Question 3: Create a linear regression model and display the full output of the model.  
+
+```{r}
+model1  <- lm(count ~ precipitation ,data=df)
+summary(model1)
+```
+
+```{r}
+best_line <- function(slope, intercept, residuals = TRUE) {
+  mlb <- df %>% mutate(y_predicted = intercept + slope * precipitation,  
+                          square_residuals = (count - y_predicted)^2)
+
+  ssr <- mlb %>% summarize(ssr = round(sum(square_residuals), 0))
+  
+  if (residuals) {
+    p <- ggplot(mlb, aes(x = precipitation , y = count)) +
+          geom_point(shape = 21, fill = 'skyblue', size = 2) + 
+          geom_line(aes(x = precipitation, y = y_predicted), colour = 'blue') + 
+          geom_segment(aes(x = precipitation, y = count, 
+                           xend = precipitation, yend = y_predicted), linetype = 2) +
+          ggtitle(paste0("Sum of Squared Resdiduals: ", ssr[[1]]))
+  } else {    
+    p <- ggplot(df, aes(x = precipitation, y = count)) +
+          geom_point(shape = 21, fill = 'skyblue', size = 2) + 
+          geom_line(aes(x = precipitation, y = y_predicted), colour = 'blue')
+  }
+  p
+}
+best_line(slope=43.260, intercept = 2658.996)
+```
+
+### Question 4: Using the variables noted in #1 and #2 above and the results of #3, write the equation for your model. 
+
+```{r}
+model1  <- lm(count ~ precipitation ,data=df)
+summary(model1)
+```
+
+Slope: 43.260
+
+Intercept: 2658.996
+
+Formula: explanatory variable^ = Intercept + Slope*response variable
+
+Formula for Count : Count^ = 2658.996 + 43.260∗precipitation
+
+### Question 5: Explain what the intercept means in the context of the data. 
+
+The intercept is 2658.996. This means that when there is 0 mm of precipitation there will be on average of 2658.996 people using rented bikes on that particular date.
+
+### Question 6: Is the intercept a useful/meaningful value in the context of our data? If yes, explain. If not, explain what purpose it serves. 
+
+Though there are no data points where there is 0 mm of precipitation the intercept is still useful as the bulk of the data is close to the intercept. Thus, though the intercept is a predicted value it is still of interest.
+
+### Question 7: Explain what the slope means in the context of the data. 
+
+The slope is  43.260. This means that for the rise of every 1 mm of precipitation there will be an expected(/predicted) increase of 43.260 people who will rent a bike on average.
+
+## MODEL ASSESSMENT
+
+### Question 1: Which metric can you use to choose between the two models you just created
+
+R-squared metric cab be used to choose between two models.
+
+### Question 2: Explain what this metric means and why it is good for comparing models. 
+
+R-squared metric means this tells how well terms fit a curve or line in linear regression models. It helps in explanatory purposes. This is good for comparing models because it helps in finding out whether there is a relationship between data or not.
+
+### Question 3: According to this metric, which model is the best of the two you created? Why? 
+
+Best model will be based on R-squared value. The one with highest R-squared value is the best model. In this case,
+
+Model1:   
+
+Count^ = 1031.443 + 73.019∗temp
+
+R^2 = 41.61%
+
+Model2:
+
+Count^ = 2658.996 + 43.260∗precipitation
+
+R^2 = 19.08%
+
+model1 gives the best R^2 value when compared to model 2. So, model1 is the best among two models.
+
+## MODEL DIAGNOSTICS
+
+### Question 1: Create two new data columns based on your best model: predicted values for your response variable and the corresponding residuals. 
+
+```{r}
+
+m1_mod<- df %>% mutate(pred_count=1031.443+73.019*temp,residuals= count-pred_count)
+
+m1_mod %>% select(count,pred_count,temp,residuals)%>% head()
+
+```
+
+### Question 2: Create a plot to check the assumption of linearity. State whether or not this condition is met and explain your reasoning. 
+
+```{r}
+ggplot(m1_mod,aes(x=temp,y=residuals))+
+  geom_point()+geom_smooth()+labs(x='Temperature',y='Residuals',title='Plot for Checking',subtitle = 'Linearity between Temperature and Residuals')+ 
+  geom_hline(yintercept = 0)
+
+```
+
+It is evident with the fitting line that the data is non-linear.And, it has an increasing trend until 55 temperature then we can see the fall. Thus, we can say that the condition of linearity is not met.  
+
+### Question 3: Create a plot to check the assumption of nearly normal residuals. State whether or not this condition is met and explain your reasoning. 
+
+```{r}
+ggplot(m1_mod,aes(x=residuals))+geom_histogram(aes(y=..density..),fill='white',color='blue')+geom_density(color='red')+labs(x='Temperature',y='Density',title='Distribution of Residuals')
+```
+
+
+From the above plot, we cannot really see a perfect bell curve  as it is having ups and downs. Thus, we can say that the residuals are not nearly normally distributed.
+
+
+### Question 4: Create a plot to check the assumption of constant variability. State whether or not this condition is met and explain your reasoning. 
+
+```{r}
+ggplot(m1_mod,aes(x=temp,y=residuals))+
+  geom_point()+labs(x='Temperature',y='Residuals',title='Plot for Checking',subtitle = 'Constant Variability between Temperature and Residuals')+
+  geom_hline(yintercept = 0)+
+  geom_hline(yintercept = 3500,color='blue')+
+  geom_hline(yintercept = -3500,color='blue')
+```
+
+Though, all the residuals are basically contained within the two horizontal blue lines. These residuals seem to be getting closer and going far away from 0 and it also  looks like the points are having a curving pattern changing the variability as the temp increases, thus the constant variability condition is not met 
+
+## CONCLUSION
+
+### Question 1: Based on the results of the “Model Diagnostics” section above, what can you conclude about your model? 
+
+Since, neither of the conditions i.e., (Linearity, NNR and Constant variability) are met. We cannot reliably use this model to describe the relationship between count and temp and as a way to predict the count of bike given the temperature.  
+
+
+
+
